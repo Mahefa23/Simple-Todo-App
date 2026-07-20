@@ -38,6 +38,30 @@ function App() {
     filteredTodos = todos.filter(todo => todo.priority === filter);
   }
 
+  const urgentCount = todos.filter((t) => t.priority === "Urgent").length
+  const mediumCount = todos.filter((t) => t.priority === "Moyenne").length
+  const lowCount = todos.filter((t) => t.priority === "Basse").length
+  const totalCount = todos.length
+
+  function deleteTodo(id: number) {
+    const updatedTodos = todos.filter(todo => todo.id !== id);
+    setTodos(updatedTodos);
+  }
+
+  const [selectedTodos, setSelectedTodos] = useState<number[]>([]);
+  function toggleSelectTodo(id: number) {
+    if (selectedTodos.includes(id)) {
+      setSelectedTodos(selectedTodos.filter(todoId => todoId !== id));
+    } else {
+      setSelectedTodos([...selectedTodos, id]);
+    }
+  }
+
+  const finishTodos = () => {
+    const updatedTodos = todos.filter(todo => !selectedTodos.includes(todo.id));
+    setTodos(updatedTodos);
+    setSelectedTodos([]);
+  } 
 
   return (
     <>
@@ -47,7 +71,7 @@ function App() {
             <input
               type="text"
               className="input w-full"
-              placeholder="Sorato eto ny raharaha tokony ho atao..."
+              placeholder="Sorato eto ny zavatra tokony ho atao..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
@@ -61,22 +85,54 @@ function App() {
             <button onClick={addTodo} className="btn btn-primary">Hapiana</button>
           </div>
           <div className="space-y-2 flex-1 h-fit">
-            <div className="flex flex-wrap gap-4">
+          <div className="flex justify-between items-center">
+              <div className="flex flex-wrap gap-4">
               <button
                 className={`btn btn-soft btn-sm ${filter === "All" ? "btn-success" : ""}`}
                 onClick={() => setFilter("All")}
               >
-                Izy rehetra
+                Izy rehetra ({totalCount})
               </button>
+              <button
+                className={`btn btn-soft btn-sm ${filter === "Urgent" ? "btn-success" : ""}`}
+                onClick={() => setFilter("Urgent")}
+              >
+                Maika ({urgentCount})
+              </button>
+              <button
+                className={`btn btn-soft btn-sm ${filter === "Moyenne" ? "btn-success" : ""}`}
+                onClick={() => setFilter("Moyenne")}
+              >
+                Tsy dia maika ({mediumCount})
+              </button>
+              <button
+                className={`btn btn-soft btn-sm ${filter === "Basse" ? "btn-success" : ""}`}
+                onClick={() => setFilter("Basse")}
+              >
+                Afaka Miandry ({lowCount})
+              </button>
+            
             </div>
-            {filteredTodos.length>0 ? (
+              <button className="btn btn-primary btn-sm" onClick={finishTodos} disabled={selectedTodos.length === 0}>
+                Vita ({selectedTodos.length})
+              </button>
+          </div>
+            {filteredTodos.length > 0 ? (
               <ul className="divide-y divide-primary/20">
                 {filteredTodos.map((todo) => (
-                  <TodoItem key={todo.id} todo={todo} />
+                  <TodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onDelete={deleteTodo}
+                    isSelected={selectedTodos.includes(todo.id)}
+                    onToggleSelect={() => toggleSelectTodo(todo.id)}
+                  />
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-500">Tsy misy todo</p>
+              <div className="flex justify-center items-center h-24">
+                <p className="flex justify-around text-gray-500 text-sm">Tsy misy zavatra tokony ho atao</p>
+              </div>
             )}
 
           </div>
